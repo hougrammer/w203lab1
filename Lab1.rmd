@@ -1,0 +1,49 @@
+---
+title: "Lab1"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+First, we load the data into R.  We do this using dplyr to take advantage of its table manipulation methods.  For easy access, we join the three datasets together.  A simple full_join is sufficient.
+
+
+```{r load_data, warning=FALSE}
+library(dplyr)
+t1 = as_tibble(read.csv('Penetration.csv', stringsAsFactors = F))
+t2 = as_tibble(read.csv('Price.csv', stringsAsFactors = F))
+t3 = as_tibble(read.csv('Speed.csv', stringsAsFactors = F))
+
+t = t1 %>% full_join(t2) %>% full_join(t3)
+str(t)
+```
+
+We see a couple of issues with the data:
+1. There are two blank rows at the bottom, which We filter out of the table.  
+2. The 'X' variable seems to be empty, so we omit that column.
+3. Due to a typo in the original data, Both 'Country.Code' and 'Country.code' exist.  We omit the latter.
+4. There are percent signs, dollar signs, and commas being used as decimal separators.  There's probably some R function better than read.csv for cleaning these columns, but let's use some regular expressions just for fun. 
+
+```{r clean_data, warning=FALSE}
+clean_percent = function(x) as.numeric(gsub('%', '', x))
+clean_dollar = function(x) as.numeric(gsub('\\$', '', x))
+clean_commas = function(x) as.numeric(gsub(',', '.', x))
+
+t = t %>%
+    filter(Country != '') %>%
+    select(-c(X, Country.code)) %>%
+    mutate(Growth.in.3G.penetration = clean_percent(Growth.in.3G.penetration)) %>%
+    mutate(Percent.of.population.in.urban.areas = clean_percent(Percent.of.population.in.urban.areas))
+
+for (c in grep('Price', names(t))) t[c] = unlist(lapply(t[c], clean_dollar))
+for (c in grep('Maximum|Average|Standard|Median|X90p', names(t))) t[c] = unlist(lapply(t[c], clean_commas))
+str(t)
+```
+
+Now we have a tidy data set.  All the columns hold either numeric or integer data with the exceptions of 'Country' and 'Country.Code', which we'll leave as character vectors for now.
+
+
