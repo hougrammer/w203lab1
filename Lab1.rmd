@@ -46,4 +46,69 @@ str(t)
 
 Now we have a tidy data set.  All the columns hold either numeric or integer data with the exceptions of 'Country' and 'Country.Code', which we'll leave as character vectors for now.
 
+## Exploratory Data Analysis
 
+Create the scatterplot matrix to investigate the relationships between variables. We focus on the Household Penetration Rate, Average Actual Speed, and the Price for high, medium, and low speed.
+
+```{r}
+library(car)
+
+scatterplotMatrix( ~ t$Household.penetration..OECD  + t$Average.actual.speed..Akamai..kbps. + t$Price.for.high.speeds..combined + Price.for.very.high.speeds..combined, 
+                   data = t,
+                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Very High and High Speed")
+
+
+scatterplotMatrix( ~ t$Household.penetration..OECD  + t$Average.actual.speed..Akamai..kbps. + t$Price.for.med.speeds..combined,
+                   data = t,
+                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Medium Speed")
+
+scatterplotMatrix( ~ t$Household.penetration..OECD+ t$Average.actual.speed..Akamai..kbps. + t$Price.for.low.speeds..combined, 
+                   data = t,
+                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Low Speed")
+
+```
+
+From the scatter plot matrix we discovered:
+1. There is a positive relationship between the household penetration rate and the actual speed, only when the consumers are paying for high or very high speed. 
+2. House penetration rate and the medium and low price displayed negative relationship. The result suggested that the lower the price consumer paid, the less house penetration rate the signal is.
+
+
+
+Get the descriptive statistics of the variables
+
+```{r}
+summary(t$Household.penetration..OECD)
+```
+
+```{r}
+summary(t$Average.actual.speed..Akamai..kbps.)
+```
+
+```{r}
+summary(t$Price.for.very.high.speeds..combined)
+```
+
+Create the histogram for very high speed price
+
+```{r}
+hist(t$Price.for.very.high.speeds..combined, main = "Price for high speed",
+     xlab = NULL)
+axis(2, at = 0:135)
+```
+
+Create the regression line to see the relationship.
+```{r}
+plot(t$Household.penetration..OECD, factor = 2, t$Price.for.very.high.speeds..combined, factor = 2,
+     xlab = "House Penetration", ylab = "Very High Speed Price",
+     main = "House Penetration and Price of Very High Speed")
+abline(lm(t$Household.penetration..OECD ~ t$Price.for.very.high.speeds..combined))
+```
+
+
+```{r}
+summary(t$Price.for.high.speeds..combined)
+
+summary(t$Price.for.med.speeds..combined)
+
+summary(t$Price.for.low.speeds..combined)
+```
