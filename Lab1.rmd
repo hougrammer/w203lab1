@@ -41,10 +41,81 @@ t = t %>%
 
 for (c in grep('Price', names(t))) t[c] = unlist(lapply(t[c], clean_dollar))
 for (c in grep('Maximum|Average|Standard|Median|X90p', names(t))) t[c] = unlist(lapply(t[c], clean_commas))
+t$Country = factor(t$Country)
+t$Country.Code = factor(t$Country.Code)
 str(t)
 ```
 
-Now we have a tidy data set.  All the columns hold either numeric or integer data with the exceptions of 'Country' and 'Country.Code', which we'll leave as character vectors for now.
+Now we have a tidy data set.  All the columns hold either numeric or integer data with the exceptions of 'Country' and 'Country.Code'.
+
+## Univariate Analysis of Key Variables
+
+First let's take a look at household penetration by country. I'm using ggplot2 because it makes better barplots than the base package.
+```{r}
+library(ggplot2)
+ggplot(t, aes(x=reorder(Country, Household.penetration..OECD), y=Household.penetration..OECD)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Household.penetration..OECD), nudge_y = 3, size = 2) +
+    labs(y = 'Household Penetration (%)', x = 'Country') +
+    coord_flip()
+```
+Korea has the highest Household penetration with 94.13%.  The United States is pretty middle-of-the-road with 50.8%.  Turkey has the lowest penetration at 1.73%.
+
+Let's also take a look at average speed.
+
+```{r}
+ggplot(t, aes(x=reorder(Country, Average.actual.speed..Akamai..kbps.), y=Average.actual.speed..Akamai..kbps.)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Average.actual.speed..Akamai..kbps.), nudge_y = 3, size = 2) +
+    labs(y = 'Average Actual Speed (kbps)', x = 'Country') +
+    coord_flip()
+```
+
+We immediately notice a few countries with missing data.  It is worth noting that the countries with missing data (Turkey, Slovak Republic, Poland, and Hungary) were also very low in household penetration.  In addition Mexico seems to have an abnormally high speed.  I think that this may be an error of some sort.  Let's take a look at the same plot but with some filtered rows.
+
+```{r}
+ggplot(filter(t, !is.na(Average.actual.speed..Akamai..kbps.) & Country != 'Mexico'), 
+        aes(x=reorder(Country, Average.actual.speed..Akamai..kbps.), y = Average.actual.speed..Akamai..kbps.)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Average.actual.speed..Akamai..kbps.), nudge_y = .5, size = 2) +
+    labs(y = 'Average Actual Speed (kbps)', x = 'Country') +
+    coord_flip()
+```
+
+Here we see that Korea, which had the highest penetration, now has the highest speed at 15.239 kbps.  United States has a medium speed at 3.913 kbps. Luxemborg has lowest speed at 2.497 kbps.  
+
+Finally, let's take a look at some prices.  I'm not really sure of the currency unit, but it's all relative anyways.
+```{r}
+ggplot(t, aes(x=reorder(Country, Price.for.very.high.speeds..combined), y = Price.for.very.high.speeds..combined)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Price.for.very.high.speeds..combined), nudge_y = 3, size = 2) +
+    labs(y = 'Price.for.very.high.speeds..combined', x = 'Country') +
+    coord_flip()
+```
+
+```{r}
+ggplot(t, aes(x=reorder(Country, Price.for.high.speeds..combined), y = Price.for.high.speeds..combined)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Price.for.high.speeds..combined), nudge_y = 3, size = 2) +
+    labs(y = 'Price.for.high.speeds..combined (USD)', x = 'Country') +
+    coord_flip()
+```
+
+```{r}
+ggplot(t, aes(x=reorder(Country, Price.for.med.speeds..combined), y = Price.for.med.speeds..combined)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Price.for.med.speeds..combined), nudge_y = 3, size = 2) +
+    labs(y = 'Price.for.med.speeds..combined (USD)', x = 'Country') +
+    coord_flip()
+```
+
+```{r}
+ggplot(t, aes(x=reorder(Country, Price.for.low.speeds..combined), y = Price.for.low.speeds..combined)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(label=Price.for.low.speeds..combined), nudge_y = .5, size = 2) +
+    labs(y = 'Price.for.low.speeds..combined (USD)', x = 'Country') +
+    coord_flip()
+```
 
 ## Exploratory Data Analysis
 
