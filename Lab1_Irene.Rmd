@@ -1,0 +1,157 @@
+---
+title: "Lab1_Irene"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+## 1. Background
+A research community studied government policies' influence in fostering a healthy broadband market. While it was revealed that U.S. is among the few countries that did not adopt open access policies out of all OECD countries, network owners insist that attempts to regulate prices or mandate greater penetration will reduce incentives to invest in modern equipment, and thus, there is a trade-off among price, speed, and penetration.
+We are analyzing 3 sets of data - Price, Penetration, Speed - to examine if there are positive/negative relationship between Speed(quality of network) and price and/or penetration.
+More explicitly:
+1) Does the network quality(Speed) falls if price is held low? Positive relationship?
+2) Does the network quality(Speed) falls if penetration is forced high? Negative relationship?
+
+## 2. Setup
+First, we load the data into R. We do this using dplyr to take advantage of its table manipulation methods.
+```{r}
+library(dplyr)
+library(car)
+?full_join
+
+Penetration = as_tibble(read.csv("Penetration.csv"), stringsAsFactors = F)
+Price = as_tibble(read.csv("Price.csv"), stringsAsFactors = F)
+Speed = as_tibble(read.csv("Speed.csv"), stringsAsFactors = F)
+```
+We have 3 sets of data - Penetration, Price, and Speed. They all have observations of 30 countries that sum up to 31 variables in total.
+
+## 3. Merge
+For easy access, we join the three datasets together. A simple full_join is sufficient.
+```{r}
+Speed <- rename(Speed, Country.Code = Country.code)
+
+t <- full_join(Penetration, full_join(Price, Speed, by = c("Country","Country.Code"), copy = FALSE), by = c("Country","Country.Code"), copy = FALSE)
+t
+```
+
+## 4. Cleansing
+We see a couple of issues with the data:
+There are two blank rows at the bottom, which We filter out of the table.
+The 'X' variable seems to be empty, so we omit that column.
+Due to a typo in the original data, Both 'Country.Code' and 'Country.code' exist. We omit the latter.
+There are percent signs, dollar signs, and commas being used as decimal separators. There's probably some R function better than read.csv for cleaning these columns, but let's use some regular expressions just for fun.
+```{r}
+clean_percent = function(x) as.numeric(gsub('%', '', x))
+clean_dollar = function(x) as.numeric(gsub('\\$', '', x))
+clean_commas = function(x) as.numeric(gsub(',', '.', x))
+
+t = t %>%
+    filter(Country != '') %>%
+    select(-c(X, Country.Code)) %>%
+    mutate(Growth.in.3G.penetration = clean_percent(Growth.in.3G.penetration)) %>%
+    mutate(Percent.of.population.in.urban.areas = clean_percent(Percent.of.population.in.urban.areas))
+
+for (c in grep('Price', names(t))) t[c] = unlist(lapply(t[c], clean_dollar))
+for (c in grep('Maximum|Average|Standard|Median|X90p', names(t))) t[c] = unlist(lapply(t[c], clean_commas))
+str(t)
+```
+
+# Univariate Analysis of Key Variables
+## 1. Average network speed
+```{r}
+summary(t$Average.actual.speed..Akamai..kbps., na.rm = T)
+hist(t$Average.actual.speed..Akamai..kbps., breaks = 20)
+```
+There seems to be an outlier at 948 kbps(max), which makes it difficult to examine the distribution of the values where values are clustered. Let's remove the outlier.
+```{r}
+t_sub1 <- subset(t, Average.actual.speed..Akamai..kbps. < 800, na.rm = T)
+summary(t_sub1$Average.actual.speed..Akamai..kbps.)
+hist(t_sub1$Average.actual.speed..Akamai..kbps., breaks = 20)
+```
+We can now notice that mean value has become close to Median, and that most countries have network speed between 2 to 5.5, with another outlier at 15.
+Let's remove this value.
+```{r}
+t_sub2 <- subset(t_sub1, Average.actual.speed..Akamai..kbps. < 10, na.rm = T)
+summary(t_sub2$Average.actual.speed..Akamai..kbps.)
+hist(t_sub2$Average.actual.speed..Akamai..kbps., breaks = 20)
+```
+Now we can see more clearly that the actual average speed has negative skew with a mean value at 3.881.
+
+## 2. Household penetration
+```{r}
+summary(t$Household.penetration..OECD)
+hist(t$Household.penetration..OECD, breaks = 20)
+```
+We can clearly see that most of the countries' household penetration lies between 25% and 80% with a slight negative skew.
+
+## 3. Price for various speeds
+### A.Price for very high speed network
+```{r}
+summary(t$Price.for.very.high.speeds..combined, na.rm = T)
+hist(t$Price.for.very.high.speeds..combined, breaks = 20)
+```
+This histogram shows that price for very high speeds are everywhere, without any regular dispersion.
+
+### B.Price for high speed network
+```{r}
+summary(t$Price.for.high.speeds..combined, na.rm = T)
+hist(t$Price.for.high.speeds..combined, breaks = 20)
+```
+We can see that the outlier above 200 makes examination of distribution difficult.
+```{r}
+t_sub3 <- subset(t_sub2, Price.for.high.speeds..combined < 200, na.rm = T)
+hist(t_sub3$Price.for.high.speeds..combined, breaks = 20)
+```
+From this revised subset, we can see that most countries charge 30 to 70 dollars for high speed internet varying diversely.
+
+### C.Price for Med speed network
+```{r}
+summary(t$Price.for.med.speeds..combined)
+hist(t$Price.for.med.speeds..combined, breaks = 20)
+```
+Compared to high speed networks, medium speed network shows more clustered around 30-50 dollars.
+
+### D.Price for Low speed network
+```{r}
+summary(t$Price.for.low.speeds..combined)
+hist(t$Price.for.low.speeds..combined, breaks = 20)
+```
+Low price network also has similarly shaped histogram to medium speed network, compared to high speed network.
+
+#Analysis of Key Relationships
+##Scatterplot Matrix
+To test relationsihps among the key variables, we first draw the scatterplot matrix.
+```{r}
+scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. + t$Household.penetration..OECD + t$Price.for.very.high.speeds..combined + t$Price.for.high.speeds..combined + t$Price.for.med.speeds..combined + t$Price.for.low.speeds..combined, diagonal = "hist")
+```
+We can see some slight negative relationship between penetration and speed, but it is biased because of some outliers. Relationship between price and speed also seems affected by the outlier.
+Let's draw scatterplot matrix for Speed, Penetration, and Price, for different prices for High, Med, and Low speed network.
+
+```{r}
+scatterplotMatrix( ~t_sub3$Average.actual.speed..Akamai..kbps. + t_sub3$Household.penetration..OECD + t_sub3$Price.for.very.high.speeds..combined + t_sub3$Price.for.high.speeds..combined + t_sub3$Price.for.med.speeds..combined + t_sub3$Price.for.low.speeds..combined, diagonal = "hist")
+```
+
+We can clearly see:
+1) Positive relationship between Speed and Penetration; and
+2) Negative relationships between Speed and Prices, more so with Price for med and low speed networks than Price for high speed networks.
+The reason why there is weaker relationship between Speed and price for high/veryhigh than Speed and price for low/med is because prices for high/veryhigh network are dispersed more broadly than low/med network.
+This is completely the opposite to the argument of the network owners.
+
+
+#### Scatterplot with even fewer outliers on speed
+```{r}
+t_sub5 <- subset(t_sub2, Average.actual.speed..Akamai..kbps. < 7, na.rm = T)
+scatterplotMatrix( ~t_sub5$Average.actual.speed..Akamai..kbps. + t_sub5$Household.penetration..OECD + t_sub5$Price.for.very.high.speeds..combined + t_sub5$Price.for.high.speeds..combined + t_sub5$Price.for.med.speeds..combined + t_sub5$Price.for.low.speeds..combined, diagonal = "hist")
+```
+
+
+#Analysis of Secondary Effects
+
+
+#Conclusion
+
