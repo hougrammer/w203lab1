@@ -48,7 +48,7 @@ There are percent signs, dollar signs, and commas being used as decimal separato
 ```{r}
 clean_percent = function(x) as.numeric(gsub('%', '', x))
 clean_dollar = function(x) as.numeric(gsub('\\$', '', x))
-clean_commas = function(x) as.numeric(gsub(',', '.', x))
+clean_commas = function(x) as.numeric(gsub(',', '', x))
 
 t = t %>%
     filter(Country != '') %>%
@@ -69,14 +69,14 @@ hist(t$Average.actual.speed..Akamai..kbps., breaks = 20)
 ```
 There seems to be an outlier at 948 kbps(max), which makes it difficult to examine the distribution of the values where values are clustered. Let's remove the outlier.
 ```{r}
-t_sub1 <- subset(t, Average.actual.speed..Akamai..kbps. < 800, na.rm = T)
+t_sub1 <- subset(t, Average.actual.speed..Akamai..kbps. < 8000, na.rm = T)
 summary(t_sub1$Average.actual.speed..Akamai..kbps.)
 hist(t_sub1$Average.actual.speed..Akamai..kbps., breaks = 20)
 ```
 We can now notice that mean value has become close to Median, and that most countries have network speed between 2 to 5.5, with another outlier at 15.
 Let's remove this value.
 ```{r}
-t_sub2 <- subset(t_sub1, Average.actual.speed..Akamai..kbps. < 10, na.rm = T)
+t_sub2 <- subset(t_sub1, Average.actual.speed..Akamai..kbps. > 1000, na.rm = T)
 summary(t_sub2$Average.actual.speed..Akamai..kbps.)
 hist(t_sub2$Average.actual.speed..Akamai..kbps., breaks = 20)
 ```
@@ -127,15 +127,24 @@ Low price network also has similarly shaped histogram to medium speed network, c
 ##Scatterplot Matrix
 To test relationsihps among the key variables, we first draw the scatterplot matrix.
 ```{r}
-scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. + t$Household.penetration..OECD + t$Price.for.very.high.speeds..combined + t$Price.for.high.speeds..combined + t$Price.for.med.speeds..combined + t$Price.for.low.speeds..combined, diagonal = "hist")
+#scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. + t$Household.penetration..OECD + t$Price.for.very.high.speeds..combined + t$Price.for.high.speeds..combined + t$Price.for.med.speeds..combined + t$Price.for.low.speeds..combined, diagonal = "hist")
+scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. + t$Household.penetration..OECD, diagonal = 'hist')
 ```
+```{r}
+scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. + t$Price.for.very.high.speeds..combined + t$Price.for.high.speeds..combined, diagonal = 'hist')
+```
+
 We can see some slight negative relationship between penetration and speed, but it is biased because of some outliers. Relationship between price and speed also seems affected by the outlier.
 Let's draw scatterplot matrix for Speed, Penetration, and Price, for different prices for High, Med, and Low speed network.
 
 ```{r}
-scatterplotMatrix( ~t_sub3$Average.actual.speed..Akamai..kbps. + t_sub3$Household.penetration..OECD + t_sub3$Price.for.very.high.speeds..combined + t_sub3$Price.for.high.speeds..combined + t_sub3$Price.for.med.speeds..combined + t_sub3$Price.for.low.speeds..combined, diagonal = "hist")
+#scatterplotMatrix( ~t_sub3$Average.actual.speed..Akamai..kbps. + t_sub3$Household.penetration..OECD + t_sub3$Price.for.very.high.speeds..combined + t_sub3$Price.for.high.speeds..combined + t_sub3$Price.for.med.speeds..combined + t_sub3$Price.for.low.speeds..combined, diagonal = "hist")
+scatterplotMatrix( ~t_sub3$Average.actual.speed..Akamai..kbps. + t_sub3$Household.penetration..OECD, diagonal = 'hist')
 ```
 
+```{r}
+scatterplotMatrix( ~t_sub3$Average.actual.speed..Akamai..kbps. + t_sub3$Price.for.high.speeds..combined + t_sub3$Price.for.very.high.speeds..combined, diagonal = "hist")
+```
 We can clearly see:
 1) Positive relationship between Speed and Penetration; and
 2) Negative relationships between Speed and Prices, more so with Price for med and low speed networks than Price for high speed networks.
