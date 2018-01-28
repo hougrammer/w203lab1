@@ -23,9 +23,9 @@ First, we load the data into R.  We do this using dplyr to take advantage of its
 ```{r load_data, warning=FALSE}
 library(dplyr)
 library(car)
-t1 = as_tibble(read.csv('Penetration.csv', stringsAsFactors = F))
-t2 = as_tibble(read.csv('Price.csv', stringsAsFactors = F))
-t3 = as_tibble(read.csv('Speed.csv', stringsAsFactors = F))
+t1 = as_tibble(read.csv('C:\Users\huang\W203\Lab 1\Penetration.csv', stringsAsFactors = F))
+t2 = as_tibble(read.csv('C:\Users\huang\W203\Lab 1\Price.csv', stringsAsFactors = F))
+t3 = as_tibble(read.csv('C:\Users\huang\W203\Lab 1\Speed.csv', stringsAsFactors = F))
 
 t = t1 %>% full_join(t2) %>% full_join(t3)
 str(t)
@@ -272,13 +272,114 @@ plot(t$Household.penetration..OECD, factor = 2, t$Price.for.very.high.speeds..co
      xlab = "House Penetration", ylab = "Very High Speed Price",
      main = "House Penetration and Price of Very High Speed")
 abline(lm(t$Household.penetration..OECD ~ t$Price.for.very.high.speeds..combined))
+
+
+scatterplotMatrix( ~ t$Household.penetration..OECD  + t$Average.actual.speed..Akamai..kbps. + t$Price.for.med.speeds..combined,
+                   data = t,
+                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Medium Speed")
+
+scatterplotMatrix( ~ t$Household.penetration..OECD+ t$Average.actual.speed..Akamai..kbps. + t$Price.for.low.speeds..combined, 
+                   data = t,
+                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Low Speed")
 ```
 
+From the scatter plot matrix we discovered:
+
+1. There is a positive relationship between the household penetration rate and the actual speed, only when the consumers are paying for high or very high speed. 
+
+2. House penetration rate and the medium and low price displayed negative relationship. The result suggested that the lower the price consumer paid, the less house penetration rate the signal is.
+
+
+### Create the histogram for very high speed price
 
 ```{r}
-summary(t$Price.for.high.speeds..combined)
-
-summary(t$Price.for.med.speeds..combined)
-
-summary(t$Price.for.low.speeds..combined)
+hist(t$Price.for.very.high.speeds..combined, main = "Price for high speed",
+     xlab = NULL)
+axis(2, at = 0:135)
 ```
+
+### Create the regression line to see the relationship.
+
+```{r}
+plot(t$Household.penetration..OECD, factor = 2, t$Price.for.very.high.speeds..combined, factor = 2,
+     xlab = "House Penetration", ylab = "Very High Speed Price",
+     main = "House Penetration and Price of Very High Speed")
+abline(lm(t$Household.penetration..OECD ~ t$Price.for.very.high.speeds..combined))
+
+plot(t$Household.penetration..OECD, factor = 2, t$Price.for.high.speeds..combined, factor = 2,
+     xlab = "House Penetration", ylab = "High Speed Price",
+     main = "House Penetration and Price of High Speed")
+abline(lm(t$Household.penetration..OECD ~ t$Price.for.high.speeds..combined))
+
+plot(t$Household.penetration..OECD, factor = 2, t$Percent.of.population.in.urban.areas, factor = 2,
+     xlab = "House Penetration", ylab = "Population % in Urban Areas",
+     main = "House Penetration and Population in Urban Areas")
+
+plot(t$Average.actual.speed..Akamai..kbps., factor = 2, t$Percent.of.population.in.urban.areas, factor = 2,
+     xlab = "Average Speed", ylab = "Population % in Urban Areas",
+     main = "Average Speed and Population in Urban Areas")
+```
+
+From the graph, we see there are relationship between average actual speed and the percenta of population in urban areas and the price.
+To further investigate the relationship we use linear regression to see if the average actual speed change according to these two variables.
+
+```{r}
+lm(t$Household.penetration..OECD ~ t$Percent.of.population.in.urban.areas)
+```
+
+On average, the household penetration rate is 29.6. For every percent increase in the population in urban areas, the household penetration rate increase by 0.21.
+
+Next, we examine the average actual speed.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.areas)
+```
+
+On average, the average actual speed is 2451.79. For every percent increase in the population, the average speed increase by 22.81. This is somehow questionable because we expect the more user in the area, the lower the average speed is. The result showed the opposite.
+
+Then we look at the actual average speed with the price for very high speed internet, the high speed,the medium, and the low speed.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.very.high.speeds..combined)
+```
+
+On average, the acctual speed for very high speed is 7526.16.  The average speed for high speed is 5339.31.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.high.speeds..combined)
+
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.med.speeds..combined)
+
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.low.speeds..combined)
+```
+
+The average speed for medium speed is 6909.38. This speed is higher than the high speed internet.
+The average speed for low speed price is 6178.61. Again, the average speed is higher than high speed internet.
+
+Because of the problematic average speed for high price internet we added the percent of population in urban areas.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.areas + t$Price.for.very.high.speeds..combined)
+```
+
+The average speed for very high speed internet price is 3788.05. For every dollar less the consumers paid, the speed reduced by 21.84.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.areas + t$Price.for.high.speeds..combined)
+```
+
+The average speed for high speed internet is 3585.35. For every dollar less the consumers paid, the speed reduced by 21.84.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.areas + t$Price.for.med.speeds..combined)
+```
+
+The averag speed for medium speed internet is 4045.76. For every dollar less the consumers paid, the speed reduce by 79.98.
+
+```{r}
+lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.areas + t$Price.for.low.speeds..combined)
+```
+The average speed for low speed internet is 2987.39. For every dollar less the consumers paid for the internet, the average speed reduce by 83.42.
+
+In conclusion, the average speed is the highest for medium internet speed consumers. The result suggested that the price for high and very high speed did not have the advertised speed the internet providers suggested.
+Other factors such as country, might also play a role in determine the average speed. 
