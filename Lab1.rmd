@@ -11,14 +11,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-### Background
+# Introduction
 A research community studied government policies' influence in fostering a healthy broadband market. While it was revealed that U.S. is among the few countries that did not adopt open access policies out of all OECD countries, network owners insist that attempts to regulate prices or mandate greater penetration will reduce incentives to invest in modern equipment, and thus, there is a trade-off among price, speed, and penetration.
 We are analyzing 3 sets of data - Price, Penetration, Speed - to examine if there are positive/negative relationship between Speed(quality of network) and price and/or penetration.
 More explicitly:
 1) Does the network quality(Speed) falls if price is held low? Positive relationship?
 2) Does the network quality(Speed) falls if penetration is forced high? Negative relationship?
 
-### Setup
+## Setup
 First, we load the data into R.  We do this using dplyr to take advantage of its table manipulation methods.  For easy access, we join the three datasets together.  A simple full_join is sufficient.
 
 
@@ -33,7 +33,7 @@ t = t1 %>% full_join(t2) %>% full_join(t3)
 str(t)
 ```
 
-### Cleansing
+## Cleansing
 We see a couple of issues with the data:
 1. There are two blank rows at the bottom, which We filter out of the table.  
 2. The 'X' variable seems to be empty, so we omit that column.
@@ -60,7 +60,7 @@ str(t)
 
 Now we have a tidy data set.  All the columns hold either numeric or integer data with the exceptions of 'Country' and 'Country.Code'.
 
-## Univariate Analysis of Key Variables
+# Univariate Analysis of Key Variables
 
 First let's take a look at household penetration by country. I'm using ggplot2 because it makes better barplots than the base package.
 ```{r}
@@ -359,7 +359,7 @@ lm(t$Average.actual.speed..Akamai..kbps. ~ t$Percent.of.population.in.urban.area
 The average speed for low speed internet is 2987.39. For every dollar less the consumers paid for the internet, the average speed reduce by 83.42.
 
 
-## Conclusion
+# Conclusion
 In conclusion, the average speed is the highest for medium internet speed consumers. The result suggested that the price for high and very high speed did not have the advertised speed the internet providers suggested.
 Other factors such as country, might also play a role in determine the average speed. 
 
