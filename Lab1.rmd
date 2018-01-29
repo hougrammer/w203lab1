@@ -1,12 +1,6 @@
 ---
-output:
-  pdf_document: default
-  html_document: default
----
-
-=======
----
 title: "Lab1"
+author: "David Hou, Jooyeon Seo, Sophia Huang"
 output: pdf_document
 ---
 
@@ -15,12 +9,14 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
 # Introduction
-A research community studied government's open access policies' of lowering prices of networks influence in fostering a healthy broadband market. While it was revealed that U.S. is among the few countries that did not adopt open access policies out of all OECD countries, network owners insist that attempts to regulate prices or mandate greater penetration will reduce their incentives to invest in modern equipment, and thus, there is a trade-off among price, speed, and penetration.
-We are analyzing 3 sets of data - Price, Penetration, Speed - to examine if there are positive/negative relationship between Speed(quality of network) and price and/or penetration. In order to find out if there are benefits of open access policies, we're going to run analyses based on network owners' claims.
+A research community studied governments' open access policies: how lowering prices of networks influences broadband market health. While it was revealed that U.S. is among the few countries that did not adopt open access policies out of all OECD countries, network owners insist that attempts to regulate prices or mandate greater penetration will reduce their incentives to invest in modern equipment, and thus, there is a trade-off among price, speed, and penetration.
+
+We are analyzing 3 variables -- house penetration, network speed, and price -- to see if there are positive/negative relationships among them. In order to find out if there are benefits of open access policies, we're going to run analyses based on network owners' claims.
 More explicitly:
-1) Is the network Speed lower where price is lower? Positive relationship?
-2) Is the network Speed lower where penetration is forced high? Negative relationship?
-3) Is the network penetration rate lower where price is lower? Positive relationship?
+
+1. Is the network Speed lower where price is lower? Positive relationship?
+2. Is the network Speed lower where penetration is forced high? Negative relationship?
+3. Is the network penetration rate lower where price is lower? Positive relationship?
 
 ## Setup
 First, we load some libraries and the data into R.  We do this using dplyr to take advantage of its table manipulation methods.  For easy access, we join the three datasets together.  A simple full_join is sufficient.
@@ -42,6 +38,7 @@ str(t)
 ## Cleaning the Data
 
 We see a couple of issues with the data:
+
 1. There are two blank rows at the bottom, which We filter out of the table.  
 2. The 'X' variable seems to be empty, so we omit that column.
 3. Due to a typo in the original data, Both 'Country.Code' and 'Country.code' exist.  We omit the latter.
@@ -90,45 +87,28 @@ ggplot(t, aes(x=reorder(Country, Average.actual.speed..Akamai..kbps.), y=Average
     labs(title = 'Average Speed by Country', y = 'Average Actual Speed (kbps)', x = 'Country') +
     coord_flip()
 ```
-We immediately notice a few countries with missing data.  It is worth noting that the countries with missing data (Turkey, Slovak Republic, Poland, and Hungary) were also very low in household penetration.  I think that this may be an error of some sort.  
-Here we see that Korea, which had the highest penetration, now has the highest speed at 15.239 kbps.  United States has a medium speed at 3.913 kbps. Luxemborg has lowest speed at 2.497 kbps.  
+We immediately notice a few countries with missing data.  It is worth noting that the countries with missing data (Turkey, Slovak Republic, Poland, and Hungary) were also very low in household penetration.  Here we see that Korea, which had the highest penetration, also has the highest speed at 15239 kbps.  In fact Korea's internet is over twice as fast as the second best (Japan).  We will see this later, as Korea shows up as an outlier in many analyses.
 
+We also see that United States has a medium speed at 3913 kbps. Mexico has lowest speed at 948 kbps.  
 
-Finally, let's take a look at some prices. We have chosen to leave NA's in the data set.  It is interesting to consider why certain countries are missing prices at certain speed tiers. Is it a data collection error or do they simply not provide those speeds?  Note that we do not actually know where the cut off points for these speed tiers are in the original dataset (e.g. very high vs. high).
+Finally, let's take a look at some prices. It is interesting to consider why certain countries are missing prices at certain speed tiers. Is it a data collection error or do they simply not provide those speeds?  Note that we do not actually know where the cut off points for these speed tiers are in the original dataset (e.g. very high vs. high).
+
 ```{r}
-ggplot(t, aes(x=reorder(Country, Price.for.very.high.speeds..combined), y = Price.for.very.high.speeds..combined)) +
+s1 = t %>% select(c(Country, Price.for.very.high.speeds..combined)) %>% mutate(speed = 'Very High') %>% 
+    rename(price = Price.for.very.high.speeds..combined)
+s2 = t %>% select(c(Country, Price.for.high.speeds..combined)) %>% mutate(speed = 'High') %>% rename(price = Price.for.high.speeds..combined)
+s3 = t %>% select(c(Country, Price.for.med.speeds..combined)) %>% mutate(speed = 'Medium') %>% rename(price = Price.for.med.speeds..combined)
+s4 = t %>% select(c(Country, Price.for.low.speeds..combined)) %>% mutate(speed = 'Low') %>% rename(price = Price.for.low.speeds..combined)
+s = s1 %>% bind_rows(s2) %>% bind_rows(s3) %>% bind_rows(s4) %>% mutate(speed = factor(speed, c('Very High', 'High', 'Medium', 'Low')))
+
+ggplot(s, aes(x = Country, y = price)) +
     geom_bar(stat='identity') +
-    geom_text(aes(label=Price.for.very.high.speeds..combined), nudge_y = 3, size = 2) +
-    labs(title = 'Price for Very High Speeds by Country', y = 'Price for Very High Speeds', x = 'Country') +
+    facet_grid(. ~ speed) +
+    labs(title = 'Price by Country', y = 'Price', x = 'Country') +
     coord_flip()
 ```
 
-```{r}
-ggplot(t, aes(x=reorder(Country, Price.for.high.speeds..combined), y = Price.for.high.speeds..combined)) +
-    geom_bar(stat='identity') +
-    geom_text(aes(label=Price.for.high.speeds..combined), nudge_y = 5, size = 2) +
-    labs(title = 'Price for High Speeds by Country', y = 'Price for High Speeds', x = 'Country') +
-    coord_flip()
-```
-
-```{r}
-ggplot(t, aes(x=reorder(Country, Price.for.med.speeds..combined), y = Price.for.med.speeds..combined)) +
-    geom_bar(stat='identity') +
-    geom_text(aes(label=Price.for.med.speeds..combined), nudge_y = 3, size = 2) +
-    labs(title = 'Price for Medium Speeds by Country', y = 'Price for Medium Speeds', x = 'Country') +
-    coord_flip()
-```
-
-```{r}
-ggplot(t, aes(x=reorder(Country, Price.for.low.speeds..combined), y = Price.for.low.speeds..combined)) +
-    geom_bar(stat='identity') +
-    geom_text(aes(label=Price.for.low.speeds..combined), nudge_y = 2, size = 2) +
-    labs(title = 'Price for Low Speeds by Country', y = 'Price for Low Speeds', x = 'Country') +
-    coord_flip()
-```
-The takeaway here is that the ranking of countries in price changes quite a lot when varying speeds, but less so between Medium and Low speeds.
-
-
+This visual shows quite a lot of missing data for very high prices.  Other interesting things of note is abnormally high price in Poland (which is missing pricing data altogether for very high speeds).  We see that Korea, which has great penetration and speeds, also has very reasonable pricing.
 
 Now we examine the overall distribution of key variables - actual network speed, household penetration, and price for different speeds, with no segregation among countries.
 
@@ -139,7 +119,7 @@ summary(t$Average.actual.speed..Akamai..kbps., na.rm = T)
 hist(t$Average.actual.speed..Akamai..kbps., breaks = 20,
      main = 'Histogram of Average Speed', xlab = 'Average Speed (kbps)')
 ```
-There seems to be an outlier at high end (it's Korea with its ridiculously good internet), which makes it difficult to examine the distribution of the values where values are clustered. Let's remove the outlier.
+There seems to be an outlier at high end (Korea with its ridiculously good internet), which makes it difficult to examine the distribution of the values where values are clustered.  We remove the outlier for now, so we can get a better look at the rest of the countries.
 
 ```{r}
 t_sub1 <- subset(t, Average.actual.speed..Akamai..kbps. < 8000, na.rm = T)
@@ -147,7 +127,7 @@ summary(t_sub1$Average.actual.speed..Akamai..kbps.)
 hist(t_sub1$Average.actual.speed..Akamai..kbps., breaks = 20,
      main = 'Histogram of Average Speed (Outlier Removed)', xlab = 'Average Speed (kbps)')
 ```
-We can now notice that mean value has become close to the median, and that most countries have network speed between 1000 and 7000.  The distribution of speed actually looks fairly normal.
+We now see that mean and median value are fairly close for these countries (low skewness).  Most countries have network speed between 1000 and 7000. The distribution of speed actually looks fairly normal.
 
 ## Household penetration
 ```{r}
@@ -181,7 +161,7 @@ summary(t$Price.for.med.speeds..combined)
 hist(t$Price.for.med.speeds..combined, breaks = 20,
      main = 'Histogram of Price for Medium Speeds', xlab = 'Price for Medium Speeds')
 ```
-Compared to high speed networks, medium speed network shows more clustered around 30-50 dollars.
+Compared to high speed networks, medium speed network shows more clustering, around 30-50 dollars.
 
 
 #Analysis of Key Relationships
@@ -197,7 +177,7 @@ scatterplotMatrix( ~t$Average.actual.speed..Akamai..kbps. +
                      t$Price.for.med.speeds..combined +
                      t$Price.for.low.speeds..combined,
                    diagonal = 'hist',
-                   main = 'Average Speed vs Household Penetration vs Price for various speed tiers')
+                   main = 'Average Speed vs Household Penetration vs Price')
 ```
 The first column of this scatterplotMatrix is one of our main interests, which shows the relationship between 1) speed and household penetration, and 2) speed and price for speed tiers. However, we can instantly notice that these scatterplots are affcted heavily by one outlier at the far end (Korea). Let's remove the outlier for now and separate each relationship to see them more clearly.
 
@@ -273,12 +253,9 @@ plot(t_sub2$Average.actual.speed..Akamai..kbps., factor = 2, t_sub2$Price.for.hi
      main = "Average Speed and Population in Urban Areas")
 ```
 
-From the graph, we see that there are positive relationships between the Percentage of population in urban areas and House Penetration, and between the Percentage of population in urban areas and Price of various speed tiers. There doesn't seem to be a strong relationship between Percentage of population in urban areas and Speed. We can see that network owners' claim that open access policies lowering price hinders rural penetration is not sound: Countries with more people in the urban area also show higher price.
+From the graphs, we see that there are positive relationships between the Percentage of population in urban areas and House Penetration, and between the Percentage of population in urban areas and Price of various speed tiers. There doesn't seem to be a strong relationship between Percentage of population in urban areas and Speed. We can see that network owners' claim that open access policies lowering price hinders rural penetration is not sound: Countries with more people in the urban area also show higher price.
 
 
-
-
-==========================================================================================================
 To further investigate the relationship we use linear regression to see if the average actual speed change according to these two variables.
 
 ```{r}
@@ -340,7 +317,9 @@ In conclusion, the average speed is the highest for medium internet speed consum
 
 
 # Conclusion
-We examined Speed, Household penetration, and Price of networks of 30 countries, and their relationships.
-We found that countries with higher penetration rate also has higher speed networks, and countries with higher speed networks have cheaper prices for networks. There seems to be benefits of open access policies of lowering prices for network owners.
-To examine network owners' claim that attempts to regulate prices or mandate greater penetration will reduce incentives for them to invest in non-rural, we examined the relationship between the Price of networks and Urban population in secondary effects analysis. Contrary to the claim, we found a positive relationship; Countries with higher population in urban area shows higher prices for networks.
-In conclusion, the open access policies does not seem to hinder any investments of network owners. Instead, Cheaper the networks, and higher the penetration rate, the speed of networks tends to be higher. We see a very clear evidence for the beneficial effects of open access policies.
+
+In this report, we examined speed, household penetration, and price of networks for 30 countries.  In the univariate analysis, we found that Korea has extremely good internet.  We also found a positive relationship between penetration and speeds; a negative one between speeds and price.  It seems that the countries with good internet are not only getting faster speeds, but paying less for it, too.  Of course, without accounting for the socio-economic status of these countries, it is hard to draw sweeping conclusions on who is getting ripped off and who is not.  I.e. United States prices for very high speeds were highest in this dataset, but this may have contributions from the strength of the dollar.
+
+In addition, we found that countries with higher penetration rate also have higher speed networks; countries with higher speed networks have cheaper prices. There seem to be benefits of open access policies of lowering prices for network owners.  
+
+To examine the claim that attempts to regulate prices or mandate greater penetration will reduce incentives for ISP's to invest in non-rural areas, we examined the relationship between price and urban population as a secondary effect.  We found a positive relationship: countries with higher population in urban areas showed higher prices. Thus, the open access policies do not seem to hinder any ISP investments. Cheaper networks and higher penetration rates tend to correspond to higher network speeds. We conclude that there is evidence for beneficial effects of open access policies.
