@@ -232,44 +232,13 @@ This is completely the opposite to the argument of the network owners.
 
 
 # Analysis of secondary effects
-
-
-```{r}
-scatterplotMatrix( ~ t$Household.penetration..OECD  + t$Average.actual.speed..Akamai..kbps. + t$Price.for.high.speeds..combined + Price.for.very.high.speeds..combined, 
-                   data = t,
-                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Very High and High Speed")
-
-
-scatterplotMatrix( ~ t$Household.penetration..OECD  + t$Average.actual.speed..Akamai..kbps. + t$Price.for.med.speeds..combined,
-                   data = t,
-                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Medium Speed")
-
-scatterplotMatrix( ~ t$Household.penetration..OECD+ t$Average.actual.speed..Akamai..kbps. + t$Price.for.low.speeds..combined, 
-                   data = t,
-                   main = "Scatterplot Matrix for Penetration, Actual Speed, and Price for Low Speed")
-
-```
-
-From the scatter plot matrix we discovered:
-1. There is a positive relationship between the household penetration rate and the actual speed, only when the consumers are paying for high or very high speed. 
-2. House penetration rate and the medium and low price displayed negative relationship. The result suggested that the lower the price consumer paid, the less house penetration rate the signal is.
-
-Create the regression line to see the relationship.
-From the scatter plot matrix we discovered:
-
-1. There is a positive relationship between the household penetration rate and the actual speed, only when the consumers are paying for high or very high speed. 
-
-2. House penetration rate and the medium and low price displayed negative relationship. The result suggested that the lower the price consumer paid, the less house penetration rate the signal is.
-
-## Create the histogram for very high speed price
-
-```{r}
-hist(t$Price.for.very.high.speeds..combined, main = "Price for high speed",
-     xlab = NULL)
-axis(2, at = 0:135)
-```
-
 ## Create the regression line to see the relationship.
+
+From the previous scatter plot matrix we discovered:
+1. There is a positive relationship between the household penetration rate and the actual speed, only when the consumers are paying for high or very high speed. 
+2. House penetration rate and the medium and low price displayed negative relationship. The result suggested that the lower the price consumer paid, the less house penetration rate the signal is.
+
+To further investigate the relationship between price and speed, we Created the regression line.
 
 ```{r}
 plot(t$Household.penetration..OECD, factor = 2, t$Price.for.very.high.speeds..combined, factor = 2,
@@ -312,11 +281,7 @@ Then we look at the actual average speed with the price for very high speed inte
 
 ```{r}
 lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.very.high.speeds..combined)
-```
 
-On average, the acctual speed for very high speed is 7526.16.  The average speed for high speed is 5339.31.
-
-```{r}
 lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.high.speeds..combined)
 
 lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.med.speeds..combined)
@@ -324,6 +289,7 @@ lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.med.speeds..combined)
 lm(t$Average.actual.speed..Akamai..kbps. ~ t$Price.for.low.speeds..combined)
 ```
 
+On average, the acctual speed for very high speed price is 7526.16.  The average speed for high speed price is 5339.31.
 The average speed for medium speed is 6909.38. This speed is higher than the high speed internet.
 The average speed for low speed price is 6178.61. Again, the average speed is higher than high speed internet.
 
