@@ -271,7 +271,7 @@ Next, we examine the average actual speed.
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Percent.of.population.in.urban.areas)
 ```
 
-On average, the average actual speed is 2451.79. For every percent increase in the population, the average speed increase by 0.005. This is somehow questionable because we expect the more user in the area, the lower the average speed is. The result showed the opposite.
+On average, the average actual speed is 3490.04. For every percent increase in the population, the average speed increase by 5.096. 
 
 Then we look at the actual average speed with the price for very high speed internet, the high speed,the medium, and the low speed.
 
@@ -285,9 +285,9 @@ lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Price.for.med.speeds..com
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Price.for.low.speeds..combined)
 ```
 
-On average, the acctual speed for very high speed price is 7526.16.  The average speed for high speed price is 5339.31.
-The average speed for medium speed is 6909.38. This speed is higher than the high speed internet.
-The average speed for low speed price is 6178.61. Again, the average speed is higher than high speed internet.
+On average, the actual speed for very high speed price is 5164.18  The average speed for high speed price is 4219.80.
+The average speed for medium speed is 6065.74. This speed is higher than the very high speed internet and the high speed internet.
+The average speed for low speed price is 5126.6. Again, the average speed is higher than high speed internet.
 
 Because of the problematic average speed for high price internet we added the percent of population in urban areas.
 
@@ -295,26 +295,24 @@ Because of the problematic average speed for high price internet we added the pe
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Percent.of.population.in.urban.areas + t_sub2$Price.for.very.high.speeds..combined)
 ```
 
-The average speed for very high speed internet price is 3788.05. For every dollar less the consumers paid, the speed reduced by 21.84.
+The average speed for very high speed internet price is 5174.53. For every dollar less the consumers paid, the speed reduced by 12.30. For every percent increase in the urban population, the speed reduced by 0.14.
 
 ```{r}
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Percent.of.population.in.urban.areas + t_sub2$Price.for.high.speeds..combined)
 ```
 
-The average speed for high speed internet is 3585.35. For every dollar less the consumers paid, the speed reduced by 21.84.
+The average speed for high speed internet is 3793.12. For every dollar less the consumers paid, the speed reduced by 7.28. For every percent increase in the urban population, the speed suprisingly increase by 5.69. This result suggested the types of internet (e.g. cable vs DSL) might be used in the internet infrastructure. Similar result occured in the medium and low priced internet. 
 
 ```{r}
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Percent.of.population.in.urban.areas + t_sub2$Price.for.med.speeds..combined)
 ```
 
-The average speed for medium speed internet is 4045.76. For every dollar less the consumers paid, the speed reduce by 79.98.
+The average speed for medium speed internet is 4682.40. For every dollar less the consumers paid, the speed reduce by 66.77. For every percent increase in the urban population, the speed increase by 21.77.
 
 ```{r}
 lm(t_sub2$Average.actual.speed..Akamai..kbps. ~ t_sub2$Percent.of.population.in.urban.areas + t_sub2$Price.for.low.speeds..combined)
 ```
-The average speed for low speed internet is 2987.39. For every dollar less the consumers paid for the internet, the average speed reduce by 83.42.
-
-In conclusion, the average speed is the highest for medium internet speed consumers. The result suggested that the price for high and very high speed did not have the advertised speed the internet providers suggested.
+The average speed for low speed internet is 2987.39. For every dollar less the consumers paid for the internet, the average speed reduce by 54.57. For every percent increase in the urban population, the speed increase by 14.93.
 
 
 # Conclusion
@@ -323,6 +321,8 @@ In this report, we examined speed, household penetration, and price of networks 
 
 In addition, we found that countries with higher penetration rate also have higher speed networks; countries with higher speed networks have cheaper prices. There seem to be benefits of open access policies of lowering prices for network owners.
 
-To examine the claim that attempts to regulate prices or mandate greater penetration will reduce incentives for ISP's to invest in non-rural areas, we examined the relationship between price and urban population as a secondary effect. As expected, the population percentage in urban areas also played a role in how fast internet speed was. The more consumers in the urban area, the slower the internet speed is. In addition, we found a positive relationship between urban population % and prices: countries with higher population in urban areas showed higher prices. 
+To examine the claim that attempts to regulate prices or mandate greater penetration will reduce incentives for ISP's to invest in non-rural areas, we examined the relationship between price and urban population as a secondary effect. As expected, the population percentage in urban areas also played a role in how fast internet speed was. The more consumers in the urban area, the slower the very high speed internet speed is. In addition, we found a positive relationship between urban population % and prices: countries with higher population in urban areas showed higher prices. 
+
+The faster speed in the slower speed internet price potentially suggested a social economic problem. Consumers that could not afford higher price internet might not be able to afford at home internet.
 
 Thus, the open access policies do not seem to hinder any ISP investments. Cheaper networks and higher penetration rates tend to correspond to higher network speeds. We conclude that there is evidence for beneficial effects of open access policies.
