@@ -227,7 +227,7 @@ We can clearly see:
 
 # Analysis of secondary effects
 
-We're now curious to know what other factors might affect Speed, Penetration, and Price of internets. We examined the effect of population density in urban areas, to check if the network owners' following claim is valid: attempts to regulate prices or mandate greater penetration will reduce their incentives to lay cable to rural areas.
+We're now curious to know what other factors might affect Speed, Penetration, and Price of internets. First, we examined the effect of population density in urban areas, to check if the network owners' following claim is valid: attempts to regulate prices or mandate greater penetration will reduce their incentives to lay cable to rural areas.
 
 ```{r}
 scatterplotMatrix( ~ t_sub2$Percent.of.population.in.urban.areas +
@@ -321,8 +321,6 @@ In conclusion, the average speed is the highest for medium internet speed consum
 
 In this report, we examined speed, household penetration, and price of networks for 30 countries.  In the univariate analysis, we found that Korea has extremely good internet.  We also found a positive relationship between penetration and speeds; a negative one between speeds and price.  It seems that the countries with good internet are not only getting faster speeds, but paying less for it, too.  Of course, without accounting for the socio-economic status of these countries, it is hard to draw sweeping conclusions on who is getting ripped off and who is not.  I.e. United States prices for very high speeds were highest in this dataset, but this may have contributions from the strength of the dollar.
 
-In addition, we found that countries with higher penetration rate also have higher speed networks; countries with higher speed networks have cheaper prices. There seem to be benefits of open access policies of lowering prices for network owners.
+In addition, we found that countries with higher penetration rate also have higher speed networks; countries with higher speed networks have cheaper prices. There seem to be benefits of open access policies of lowering prices for network owners.  
 
-To examine the claim that attempts to regulate prices or mandate greater penetration will reduce incentives for ISP's to invest in non-rural areas, we examined the relationship between price and urban population as a secondary effect. As expected, the population percentage in urban areas also played a role in how fast internet speed was. The more consumers in the urban area, the slower the internet speed is. In addition, we found a positive relationship between urban population % and prices: countries with higher population in urban areas showed higher prices. 
-
-Thus, the open access policies do not seem to hinder any ISP investments. Cheaper networks and higher penetration rates tend to correspond to higher network speeds. We conclude that there is evidence for beneficial effects of open access policies.
+To examine the claim that attempts to regulate prices or mandate greater penetration will reduce incentives for ISP's to invest in non-rural areas, we examined the relationship between price and urban population as a secondary effect.  We found a positive relationship: countries with higher population in urban areas showed higher prices. Thus, the open access policies do not seem to hinder any ISP investments. Cheaper networks and higher penetration rates tend to correspond to higher network speeds. We conclude that there is evidence for beneficial effects of open access policies.
